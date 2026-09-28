@@ -1,0 +1,10 @@
+numpy>=1.24
+scipy>=1.10
+pandas>=2.0
+h5py>=3.8
+gymnasium>=0.29
+matplotlib>=3.7
+streamlit>=1.30
+huggingface_hub>=0.20
+uvicorn>=0.27
+fastapi>=0.110

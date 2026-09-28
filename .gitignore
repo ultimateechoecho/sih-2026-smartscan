@@ -1,0 +1,22 @@
+# --- python ---
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- dataset (re-downloadable via smartscan/b1_data.py; ~13 MB of .h5) ---
+data/tsrd_raw/
+
+# --- node / react build ---
+node_modules/
+frontend-react/dist/
+
+# --- demo artifacts / local tooling ---
+_shots/
+.zcode/
+.zcodeignore
+*.log
+
+# --- OS ---
+.DS_Store
+Thumbs.db

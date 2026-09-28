@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #04070a;
+  --panel: #0a1210;
+  --grid: rgba(52, 211, 153, 0.06);
+  --green: #34d399;
+  --green-hi: #6ee7b7;
+  --amber: #fbbf24;
+  --red: #fb7185;
+  --cyan: #38bdf8;
+  --dim: #5f7a70;
+  --text: #c9e5da;
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 600px at 70% -10%, rgba(16, 185, 129, 0.07), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(56, 189, 248, 0.05), transparent 60%),
+    var(--bg);
+  color: var(--text);
+  font-family: "Cascadia Code", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+/* faint tactical grid over the whole app */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 42px 42px;
+  z-index: 0;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(52, 211, 153, 0.18); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+input[type="range"] { accent-color: var(--green); }
+select, input { color-scheme: dark; }
+
+.panel {
+  position: relative;
+  background: linear-gradient(180deg, rgba(10, 18, 16, 0.92), rgba(6, 12, 10, 0.88));
+  border: 1px solid rgba(52, 211, 153, 0.16);
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+.panel::before, .panel::after {
+  content: "";
+  position: absolute;
+  width: 10px; height: 10px;
+  border-color: rgba(110, 231, 183, 0.55);
+  border-style: solid;
+  pointer-events: none;
+}
+.panel::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; border-radius: 10px 0 0 0; }
+.panel::after { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; border-radius: 0 0 10px 0; }
+
+.panel-title {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--green-hi);
+  opacity: 0.85;
+}
+
+.glow-green { text-shadow: 0 0 12px rgba(52, 211, 153, 0.65); }
+.glow-red { text-shadow: 0 0 12px rgba(251, 113, 133, 0.6); }
+
+.led {
+  width: 8px; height: 8px; border-radius: 9999px; display: inline-block;
+}
+.led-on { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.6s infinite; }
+.led-off { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+.tab-btn {
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--dim);
+  transition: all 0.15s ease;
+  background: transparent;
+  cursor: pointer;
+}
+.tab-btn:hover { color: var(--green-hi); border-color: rgba(52, 211, 153, 0.25); }
+.tab-btn.active {
+  color: #052e21;
+  background: linear-gradient(180deg, var(--green-hi), var(--green));
+  border-color: rgba(110, 231, 183, 0.8);
+  box-shadow: 0 0 18px rgba(52, 211, 153, 0.35);
+  font-weight: 600;
+}
+
+.btn-run {
+  background: linear-gradient(180deg, var(--green-hi), var(--green));
+  color: #052e21;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.3);
+  border: none;
+  padding: 8px 22px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.btn-run:hover { filter: brightness(1.1); }
+.btn-run:disabled { opacity: 0.5; filter: grayscale(0.5); cursor: wait; }
+
+.btn-ghost {
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: var(--green-hi);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+.btn-ghost:hover { background: rgba(52, 211, 153, 0.16); }
+
+.field {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: var(--text);
+  font-size: 12px;
+}
+.field:focus { outline: none; border-color: var(--green); box-shadow: 0 0 10px rgba(52, 211, 153, 0.25); }
+
+table.roc th {
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--dim); font-weight: 500; text-align: left;
+}
+table.roc td, table.roc th { padding: 5px 10px; border-bottom: 1px solid rgba(52, 211, 153, 0.08); }
+table.roc tbody tr:hover { background: rgba(52, 211, 153, 0.05); }
