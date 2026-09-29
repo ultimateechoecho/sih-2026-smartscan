@@ -91,7 +91,9 @@ Tab 3 receiver bands, split sizes, block I/O map.
 pd = emitters intercepted / emitters; interception_ratio = emitter bursts intercepted / bursts;
 sensitivity = detected / active dwells; pfa = false alarms / empty dwells; intercept_delay =
 first activity -> first interception (censored version counts misses to mission end);
-pct_correct_pred = agent predictions confirmed by truth (+-4 slots).
+pct_correct_pred = agent predictions confirmed by truth (+-4 slots);
+intercept_time_err_s = mean |actual - predicted| slot error over agent predictions whose band
+showed activity within +-60 slots (3 s) of the predicted time.
 
 ## Rules the code enforces
 * `info[...]` truth flags never reach the scheduler; emitter `labels` from TSRD are never used.

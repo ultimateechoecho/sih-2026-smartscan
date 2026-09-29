@@ -8,6 +8,8 @@ Definitions (state these in the submission):
   intercept_rate_10s   intercepted emitters per 10 s of mission
   avg_reward           total evaluation reward per episode (truth-aware)
   pct_correct_pred     share of periodicity/stagger/beam predictions confirmed by truth (+-tol slots)
+  intercept_time_err_s mean |actual - predicted| slot error over agent predictions that had
+                       band activity within +-pred_err_tol slots of the predicted time (x slot_s)
   intercept_delay_s    mean time from an emitter's first activity to its interception
   intercept_delay_cens_s  same, but un-intercepted emitters count as (mission_end - first_active)
 Primary metrics for ranking: pd, interception_ratio, intercept_delay_cens_s, avg_reward.
@@ -34,6 +36,7 @@ class EpisodeLog:
     latency_ms: list = field(default_factory=list)
     emitters: list = field(default_factory=list)
     pred_checks: list = field(default_factory=list)
+    pred_errors: list = field(default_factory=list)
 
 
 def episode_metrics(log: EpisodeLog):
@@ -59,6 +62,8 @@ def episode_metrics(log: EpisodeLog):
         "intercept_rate_10s": len(got) / dur * 10.0,
         "avg_reward": float(np.sum(log.r_eval)),
         "pct_correct_pred": float(np.mean(log.pred_checks)) if log.pred_checks else np.nan,
+        "intercept_time_err_s": (float(np.mean(log.pred_errors)) * log.slot_s
+                                 if log.pred_errors else np.nan),
         "intercept_delay_s": float(np.mean(delays)) if delays else np.nan,
         "intercept_delay_cens_s": float(np.mean(cens)) if cens else np.nan,
         "n_dwells": len(log.t),
@@ -78,7 +83,8 @@ def aggregate(rows):
 
 PRIMARY = ["pd", "interception_ratio", "intercept_delay_cens_s", "avg_reward"]
 ORDER = ["pd", "interception_ratio", "sensitivity", "pfa", "intercept_rate_10s", "avg_reward",
-         "pct_correct_pred", "intercept_delay_s", "intercept_delay_cens_s", "latency_ms"]
+         "pct_correct_pred", "intercept_time_err_s", "intercept_delay_s",
+         "intercept_delay_cens_s", "latency_ms"]
 
 
 if __name__ == "__main__":
@@ -89,8 +95,10 @@ if __name__ == "__main__":
     log.emitters = [{"first_active": 0, "first_detect": 10, "n_bursts": 4, "n_bursts_det": 2},
                     {"first_active": 5, "first_detect": None, "n_bursts": 6, "n_bursts_det": 0}]
     log.pred_checks = [True, False]
+    log.pred_errors = [2, 8]
     m = episode_metrics(log)
     assert abs(m["interception_ratio"] - 0.2) < 1e-9 and m["pd"] == 0.5 and m["sensitivity"] == 0.5 and m["pfa"] == 0.5
     assert abs(m["intercept_delay_s"] - 0.5) < 1e-9 and m["pct_correct_pred"] == 0.5
+    assert abs(m["intercept_time_err_s"] - 0.25) < 1e-9      # mean(2,8) slots x 0.05 s
     print(m)
     print("metrics OK")

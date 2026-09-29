@@ -30,6 +30,8 @@ export const FOM = [
     def: 'Total evaluation reward over the 200 s mission (truth-aware scoring).' },
   { key: 'pct_correct_pred', label: 'Prediction Accuracy', short: 'Pred', unit: '%', pct: true, better: -1,
     def: 'Share of agent predictions (next activity time per band) confirmed by ground truth (±4 slots).' },
+  { key: 'intercept_time_err_s', label: 'Intercept Time Error', short: 'TimeErr', unit: 's', better: 1,
+    def: 'Mean |actual − predicted| timing error of agent next-activity predictions that had band activity within ±3 s (lower is better).' },
   { key: 'n_dwells', label: 'Dwells', short: 'Dwells', unit: '', better: null,
     def: 'Number of receiver dwells (decisions) in the mission.' },
   { key: 'latency_ms', label: 'Decision Latency', short: 'Latency', unit: 'ms', better: 1,

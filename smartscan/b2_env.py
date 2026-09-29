@@ -131,6 +131,18 @@ class SmartScanEnv(gym.Env):
         t_lo, t_hi = max(0, int(t_lo)), min(self.T, int(t_hi))
         return any((e.band_at[t_lo:t_hi] == band).any() for e in self._emitters)
 
+    def oracle_first_active(self, band, t_lo, t_hi):
+        """First slot in [t_lo, t_hi) with any emitter on `band`, else None.
+        Used for the intercept-time-error metric (truth never reaches the scheduler)."""
+        t_lo, t_hi = max(0, int(t_lo)), min(self.T, int(t_hi))
+        first = None
+        for e in self._emitters:
+            idx = np.flatnonzero(e.band_at[t_lo:t_hi] == band)
+            if len(idx):
+                c = t_lo + int(idx[0])
+                first = c if first is None else min(first, c)
+        return first
+
     def truth_grid(self):
         """(n_bands, T) amplitude grid, -200 = silent. For the demo heatmap only."""
         g = np.full((self.n_bands, self.T), -200.0, np.float32)

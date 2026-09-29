@@ -124,14 +124,15 @@ def decision(run_id: str, step: int = Query(ge=0)):
     F = trace["features"][step]
     names = ["hit_rate", "visit_age", "hit_age", "periodic_conf",
              "due", "scan_conf", "stagger_conf", "priority"]
+    has_scores = "Q" in dec            # bandits carry score components; baselines only a reason
     return {"step": step, "t": log.t[step], "action": log.band[step],
             "hit": log.hit[step], "detected": log.detected[step],
             "dwell_slots": log.dwell[step], "latency_ms": log.latency_ms[step],
-            "traced": dec.get("reason") is None,
+            "traced": has_scores,
             "reason": dec.get("reason"),
             "components": ({k: dec[k] for k in ("Q", "explore", "due", "priority",
                                                 "stale", "score")}
-                           if dec.get("reason") is None else None),
+                           if has_scores else None),
             "hop_conf": dec.get("hop_conf", 0.0),
             "features": {n: F[:, i].tolist() for i, n in enumerate(names)}}
 

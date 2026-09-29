@@ -26,7 +26,10 @@ def make_env(split="test", cfg: EnvConfig = None, receiver=None, stats=None):
 
 
 def run_episode(env, scheduler, seed, rw: RewardWeights = None, scfg: StateConfig = None,
-                pred_tol=4, on_step=None):
+                pred_tol=4, pred_err_tol=60, on_step=None):
+    """pred_tol: +-slots for counting a prediction "correct" (pct_correct_pred).
+    pred_err_tol: +-slots of the wider window in which the actual next activity must
+    fall for its |actual - predicted| timing error to be recorded (intercept-time-error)."""
     rw = rw or RewardWeights()
     scfg = scfg or StateConfig()
     obs, _ = env.reset(seed=seed)
@@ -56,9 +59,14 @@ def run_episode(env, scheduler, seed, rw: RewardWeights = None, scfg: StateConfi
         t = env.t
 
     log.emitters = env.emitter_summary()
-    for b, t_made, t_pred in sb.pred_log:                 # % correct predictions (truth used here only)
+    for b, t_made, t_pred in sb.pred_log:                 # truth used here only for metrics
         if t_pred < env.T:
-            log.pred_checks.append(env.oracle_band_active(b, t_pred - pred_tol, t_pred + pred_tol + 1))
+            if env.oracle_band_active(b, t_pred - pred_tol, t_pred + pred_tol + 1):
+                log.pred_checks.append(True)
+            t_act = env.oracle_first_active(b, max(t_made + 1, t_pred - pred_err_tol),
+                                            t_pred + pred_err_tol + 1)
+            if t_act is not None:
+                log.pred_errors.append(abs(t_act - t_pred))
     return log
 
 

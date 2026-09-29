@@ -139,9 +139,34 @@ def make_traced_scheduler(name, params=None):
     raise ValueError(f"unknown algo {name}")
 
 
+# component -> plain-English label, ordered by typical importance
+_UCB_LABELS = (("due", "Predicted Activity"), ("priority", "High Priority"),
+               ("stale", "Coverage (Revisit)"), ("explore", "Exploration"),
+               ("Q", "Best Hit Rate"))
+_THOMPSON_LABELS = (("due", "Predicted Activity"), ("priority", "High Priority"),
+                    ("stale", "Coverage (Revisit)"), ("Q", "Hit-Probability Sample"))
+
+
+def compose_reason(dec, algo):
+    """Plain-English decision reason for a bandit step, from its traced score
+    components at the chosen band: every component contributing >= 25% of the total."""
+    labels = _UCB_LABELS if algo == "ucb" else _THOMPSON_LABELS
+    items = [(lbl, max(0.0, float(dec[key][dec["action"]]))) for key, lbl in labels]
+    total = sum(v for _, v in items)
+    if total <= 1e-9:
+        return "Exploration (no data yet)"
+    hot = [lbl for lbl, v in items if v >= 0.25 * total]
+    return " + ".join(hot) if hot else max(items, key=lambda x: x[1])[0]
+
+
 def run_episode_traced(env, scheduler, seed, rw=None, scfg=None):
-    """run_episode + per-step feature snapshots + the scheduler's decision trace."""
+    """run_episode + per-step feature snapshots + the scheduler's decision trace.
+    Every decision gets a plain-English `reason` (baselines carry theirs natively)."""
     feats = []
     log = run_episode(env, scheduler, seed, rw, scfg,
                       on_step=lambda t, F, glob, a: feats.append(F.astype(np.float32)))
-    return log, {"features": feats, "decisions": scheduler.trace}
+    decisions = scheduler.trace
+    for d in decisions:
+        if "reason" not in d:
+            d["reason"] = compose_reason(d, scheduler.name)
+    return log, {"features": feats, "decisions": decisions}
